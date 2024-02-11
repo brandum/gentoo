@@ -1,0 +1,63 @@
+# basic btrfs on arch (uefi) using the openSuse mehtod
+
+## use fdisk
+
+refer to notes on fdisk
+
+## create filesystems
+
+`mkfs.btrfs /dev/sda2`
+`mkfs.fat -F 32 /dev/sda1`
+
+## create subvolumes
+
+`mount /dev/sda2 /mnt`
+
+`btrfs subvolume create /mnt/@`  
+`btrfs subvolume create /mnt/@/home`  
+etc...
+
+(also "`btrfs su cr`" works too)
+
+continue for hte following locations
+opt,root,srv,tmp,usr/local,var
+
+### scheme
+for an elegant set up, create the volumes (and moun thte volumes when they're ready) in this order (it's reverse alphebetical order, except fo the .snapshots one)
+
+1. @/var
+1. @/usr/local
+1. @/srv
+1. @/root
+1. @/opt
+1. @/home
+1. @/.snapshots
+1. @/.snapshots/1/snapshots
+
+
+mkdir /mnt/@/.snapshots/1  
+mkdir /mnt/@/usr/
+
+
+NOTE:
+USING RICHARD BROWN'S GUIDE ONLINE: (https://rootco.de/2018-01-19-opensuse-btrfs-subvolumes/),
+it says you should put also /boot/grub/... into a subvolume.  I could not get this to work on Arch Linux.
+
+## disable copy on right
+chattr +C /mnt/@/var
+
+## create config file for snapper
+```xml
+<?xml version="1.0"?>
+<snapshot>
+  <type>single</type>
+  <num>1</num>
+  <date>$DATE</date>
+  <description>first root filesystem</description>
+</snapshot>
+```
+## set default snapshot
+
+set snapshot 1 as the default snapshot, unmount the system that was mounted, then remount
+
+btrfs subvolume set-default

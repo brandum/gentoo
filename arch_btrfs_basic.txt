@@ -1,0 +1,50 @@
+
+
+
+mount -o noatime,compress=lzo,space_cache=v2,subvol=@ /dev/sda2 /mnt
+[space_cache=v2 deviates from tutorial https://www.youtube.com/watch?v=sm_fuBeaOqE by Emani -- new thing with kernel 5.16 ---- or don't use "space_cache" as an option]
+
+
+
+mount -o noatime,compress=lzo,space_cache=v2,subvol=@home /dev/sda2 /mnt/home
+mount /dev/sda1 /mnt/boot
+
+pacstrap -K /mnt base linux linux-firmware grub efibootmgr nano (grub-btrfs)
+
+create fstab:
+
+genfstab -U /mnt >> /mnt/etc/fstab
+
+chroot:
+
+arch-chroot /mnt
+
+ln -sf /usr/share/zoneinfo/Europe/Berlin /etc/localtime
+
+hwclock --systohc 
+
+localization
+nano /etc/locale.gen
+search for “US” using CTRL-W, press enter to search, then ALT-W for the next instances in search
+uncomment en_US.UTF-8 UTF-8
+
+locale-gen
+
+echo “LANG=en_US.UTF-8” >> /etc/locale.conf
+
+hostname
+
+echo “hostname” >> /etc/hostname
+
+create root password
+
+passwd
+
+GRUB config
+
+grub-install --target=x86_64-efi --efi-directory=/boot --bootloader-id=GRUB 
+
+grub-mkconfig -o /boot/grub/grub.cfg 
+
+
+
